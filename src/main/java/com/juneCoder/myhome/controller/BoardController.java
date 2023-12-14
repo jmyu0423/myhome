@@ -2,12 +2,14 @@ package com.juneCoder.myhome.controller;
 
 import com.juneCoder.myhome.model.Board;
 import com.juneCoder.myhome.repository.BoardRepository;
+import com.juneCoder.myhome.service.BoardService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,6 +23,9 @@ public class BoardController {
 
     @Autowired
     private BoardRepository boardRepository;
+
+    @Autowired
+    private BoardService boardService;
 
     @GetMapping("list")
     public String list(Model model, @PageableDefault(size = 2) Pageable pageable,
@@ -47,11 +52,14 @@ public class BoardController {
     }
 
     @PostMapping("/form")
-    public String greetingSubmit(@Valid Board board, BindingResult bindingResult) {
+    public String postForm(@Valid Board board, BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors()) {
             return "board/form";
         }
-        boardRepository.save(board);
+
+        String username = authentication.getName();
+        boardService.save(username, board);
+//        boardRepository.save(board);
         return "redirect:/board/list";
     }
 }
